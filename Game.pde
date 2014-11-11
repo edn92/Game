@@ -1,7 +1,7 @@
+import java.util.*;
+
 Player player;
-//LinkedList<PowerUp> powerUps = new LinkedList();
-//linkedlist don't appear to exist in processing?
-ArrayList<PowerUp> powerUps = new ArrayList();
+LinkedList<PowerUp> powerUps = new LinkedList();
 
 float powerUpsArraySize = 2;
 
