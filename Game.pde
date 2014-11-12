@@ -1,6 +1,7 @@
 import java.util.*;
 
 Player player;
+Status status;
 LinkedList<PowerUp> powerUps = new LinkedList();
 
 float powerUpsArraySize = 2;
@@ -13,8 +14,10 @@ PImage background;
 void setup(){
   size(800, 400);
   background = loadImage("background.jpg");
-  player = new Player(new PVector(50, height/2));
   keys = new boolean[4];
+  
+  player = new Player(new PVector(50, height/2));
+  status = new Status();
   
   for (int i = 0; i < powerUpsArraySize; i++){
     powerUps.add(new Shield(new PVector(random(100, width), random(75, height - 75)))); 
@@ -32,18 +35,29 @@ void draw(){
   for (int i = 0; i < powerUps.size(); i++){
     powerUps.get(i).display();
   }
-  //run things
   
-  x -= backgroundMoveSpeed;
-  if (x <= - width){
-    x += width;
+  status.display();
+  //run things if game is still going
+  if (status.getGameState() == 1){
+    //moves and resets background continuously
+    x -= backgroundMoveSpeed;
+    if (x <= - width){
+      x += width;
+    }
+    
+    //check collision with stuff
+    for (int i = 0; i < powerUps.size(); i++){
+      powerUps.get(i).collision(player.getX(), player.getY(), status);
+      powerUps.get(i).setX(powerUps.get(i).getX() - backgroundMoveSpeed);
+    }
   }
   
   keyboardInput();
 }
 
 void keyboardInput(){
-    //if state = 1 do all of this
+  //if state = 1 allow player to move
+  if (status.getGameState() == 1){
     if (keys[0]){ 
       if (player.getY() > 25){
         player.move(0, -playerMoveSpeed);
@@ -67,8 +81,15 @@ void keyboardInput(){
         player.move(playerMoveSpeed, 0);
       }
     }
-    
-    //switch toggle shield, reset game
+  }  
+    //switch toggle shield, reset game, start game
+  switch(key){
+    case ' ':
+      if (status.getGameState() == 2){ 
+        status.setGameState(1); 
+      }
+      break;
+  }
 }
 
 void keyPressed(){
