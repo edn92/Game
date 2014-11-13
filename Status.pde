@@ -6,8 +6,9 @@ class Status{
   
   boolean shieldStatus;
   PImage shieldIcon = loadImage("shield (0).png");
-  Status(){
   
+  Status(){
+    
   }
   
   int getGameState(){
@@ -47,7 +48,7 @@ class Status{
   
   //reset
   void reset(){
-    start = millis()/1000;
+    //start = millis()/1000;
     gameState = 1;
     bonus = 0;
     shieldDuration = 180;
@@ -81,7 +82,7 @@ class Status{
         drawText("Score: " + (int)getScore(), width - 55, 35, 12);
         break;
       case 2:
-        //start = millis();
+        start = millis()/1000;
         drawText("Press SPACE to start", width/2, height/2, 20);
         drawText("Score: " + (int)getLastScore(), width - 55, 35, 12);
         break;

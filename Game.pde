@@ -3,8 +3,9 @@ import java.util.*;
 Player player;
 Status status;
 LinkedList<PowerUp> powerUps = new LinkedList();
+LinkedList<Obstacle> obstacles = new LinkedList();
 
-float powerUpsArraySize = 2;
+float powerUpsStartSize = 2, obstaclesStartSize = 2;
 
 float x, backgroundMoveSpeed = 2, playerMoveSpeed = 5;
 boolean [] keys;
@@ -19,8 +20,12 @@ void setup(){
   player = new Player(new PVector(50, height/2));
   status = new Status();
   
-  for (int i = 0; i < powerUpsArraySize; i++){
+  for (int i = 0; i < powerUpsStartSize; i++){
     powerUps.add(new Shield(new PVector(random(100, width), random(75, height - 75)))); 
+  }
+  
+  for (int i = 0; i < obstaclesStartSize; i++){
+    obstacles.add(new Wall(new PVector(random(500, width), random(75, height - 75))));
   }
 } 
 
@@ -31,11 +36,15 @@ void draw(){
   image(background, x, 0, width, height);
   image(background, x + width, 0, width, height);
   
-  player.display();
+  for (int i = 0; i < obstacles.size(); i++){
+    obstacles.get(i).display();
+  }
+  
   for (int i = 0; i < powerUps.size(); i++){
     powerUps.get(i).display();
   }
   
+  player.display();
   status.display();
   //run things if game is still going
   if (status.getGameState() == 1){
@@ -49,6 +58,11 @@ void draw(){
     for (int i = 0; i < powerUps.size(); i++){
       powerUps.get(i).collision(player.getX(), player.getY(), status);
       powerUps.get(i).setX(powerUps.get(i).getX() - backgroundMoveSpeed);
+    }
+    
+    for (int i = 0; i < obstacles.size(); i++){
+      obstacles.get(i).collision(player.getX(), player.getY(), status);
+      obstacles.get(i).setX(obstacles.get(i).getX() - backgroundMoveSpeed);
     }
   }
   
