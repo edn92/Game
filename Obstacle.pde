@@ -39,9 +39,9 @@ class Wall extends Obstacle{
   
   void collision(float x, float y, Status status){
     if ((abs(location.x - x) < (wallWidth/2)) && (abs(location.y - y) < (wallHeight/2))){
-      //if (status.getShieldStatus() == false){ 
+      if (status.getShieldStatus() == false){ 
         status.setGameState(0); 
-      //}
+      }
     }  
   }
   

@@ -6,16 +6,18 @@ LinkedList<PowerUp> powerUps = new LinkedList();
 LinkedList<Obstacle> obstacles = new LinkedList();
 
 float powerUpsStartSize = 2, obstaclesStartSize = 2;
-
+int keysSize = 5;
 float x, backgroundMoveSpeed = 2, playerMoveSpeed = 5;
-boolean [] keys;
 
+boolean [] keys;
+boolean shieldToggle;
+//allows shield to be toggled correctly on one hotkey
 PImage background;
 
 void setup(){
   size(800, 400);
   background = loadImage("background.jpg");
-  keys = new boolean[4];
+  keys = new boolean[keysSize];
   
   player = new Player(new PVector(50, height/2));
   status = new Status();
@@ -95,8 +97,22 @@ void keyboardInput(){
         player.move(playerMoveSpeed, 0);
       }
     }
+    
+    if (keys[4]){
+      if (shieldToggle == false){
+        shieldToggle = true;
+        if (status.getShieldStatus() == true){
+          status.setShieldStatus(false);
+          status.setNotifyText("Deactivating shield!", 120);
+        } else if (status.getShieldDuration() > 0){
+          status.setShieldStatus(true);
+          status.setNotifyText("Shielded!", 120);
+        } else {
+          status.setNotifyText("Shield depleted.", 120);
+        }
+      }
+    }    
   }  
-    //switch toggle shield, reset game, start game
   switch(key){
     case ' ':
       if (status.getGameState() == 2){ 
@@ -120,6 +136,9 @@ void keyPressed(){
     case 'd':
       keys[3] = true;
       break;
+    case '1':
+      keys[4] = true;
+      break;  
   }
 }
 
@@ -137,5 +156,9 @@ void keyReleased(){
     case 'd':
       keys[3] = false;
       break;
+    case '1':
+      keys[4] = false;
+      shieldToggle = false;
+      break;  
   }
 }

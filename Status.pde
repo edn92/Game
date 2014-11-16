@@ -38,17 +38,16 @@ class Status{
     shieldDuration = i;
   }
   
-  /*void getShieldStatus(){
+  boolean getShieldStatus(){
     return shieldStatus;
   }
   
   void setShieldStatus(boolean shield){
     shieldStatus = shield;
-  }*/
+  }
   
   //reset
   void reset(){
-    //start = millis()/1000;
     gameState = 1;
     bonus = 0;
     shieldDuration = 180;
@@ -80,6 +79,16 @@ class Status{
       case 1:
         //score currently adding seconds from before gamestart. Works properly on reset
         drawText("Score: " + (int)getScore(), width - 55, 35, 12);
+        
+        if ((getShieldDuration() > 0) && (getShieldStatus() == true)){
+          setShieldDuration(getShieldDuration()-1);
+        }
+    
+        if (getShieldDuration() == 0 && getShieldStatus() == true){
+          setShieldStatus(false);
+          setNotifyText("Shield depleted - deactivating.", 120);
+        }
+        
         break;
       case 2:
         start = millis()/1000;
