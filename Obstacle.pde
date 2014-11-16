@@ -22,6 +22,12 @@ abstract class Obstacle{
     location.y = i;
   }
   
+  void reset(float a, float b, float c, float d){
+    //setX(random(a, b));
+    location.x = random(a, b);
+    location.y = random(c, d);
+  }
+  
   abstract void collision(float x, float y, Status status);
   
   abstract void display();
@@ -47,5 +53,38 @@ class Wall extends Obstacle{
   
   void display(){
     animation.display((int)location.x, (int)location.y, wallWidth, wallHeight);
+    if (location.x < 0){
+      reset(800, 1000, 50, height - 50);
+    }
+  }
+}
+
+class HorizontalBeam extends Obstacle{
+  //fires a beam along x axis after delay
+  HorizontalBeam(PVector location){
+  
+  }
+  
+  void collision(float x, float y, Status status){
+  
+  }
+  
+  void display(){
+  
+  }
+}
+
+class VerticalBeam extends Obstacle{
+  //fires a beam along y axis after delay
+  VerticalBeam(PVector location){
+    
+  }
+  
+  void collision(float x, float y, Status status){
+  
+  }
+  
+  void display(){
+  
   }
 }

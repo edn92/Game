@@ -63,6 +63,7 @@ void draw(){
     }
     
     for (int i = 0; i < obstacles.size(); i++){
+      //if walls are too close to each other respawn
       obstacles.get(i).collision(player.getX(), player.getY(), status);
       obstacles.get(i).setX(obstacles.get(i).getX() - backgroundMoveSpeed);
     }
