@@ -59,6 +59,31 @@ class Wall extends Obstacle{
   }
 }
 
+class Tracker extends Obstacle implements Clickable{
+  //tracks and follows the player until destroyed
+  
+  Tracker(PVector loc){
+    this.location = loc;
+  }
+  
+  void collision(float x, float y, Status status){
+  
+  }
+  
+  void display(){
+  
+  }
+  
+  //getset destroy
+  //getset respawn
+  //play destroyed animation ONCE - written in seperate class like animation?
+  
+  boolean clicked(){
+    //destroy when clicked
+    return false;
+  }
+}
+
 class HorizontalBeam extends Obstacle{
   //fires a beam along x axis after delay
   HorizontalBeam(PVector location){
