@@ -4,7 +4,6 @@ class Player{
   
   Player(PVector location){
     this.location = location;
-    
     animation = new Animation("player ", 72);
   }
   

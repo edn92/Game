@@ -29,6 +29,10 @@ class Status{
     return last;
   }
   
+  void addBonus(float i){
+    bonus += i;
+  }
+  
   //shield stuff
   float getShieldDuration(){
     return shieldDuration;
