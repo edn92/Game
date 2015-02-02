@@ -1,10 +1,14 @@
 class Player{
   PVector location;
   Animation animation;
+  float flyerWidth, flyerHeight;
   
-  Player(PVector location){
+  Player(PVector location, float flyerWidth, float flyerHeight){
     this.location = location;
-    animation = new Animation("player ", 72);
+    this.flyerWidth = flyerWidth;
+    this.flyerHeight = flyerHeight;
+    
+    animation = new Animation("player ", 60);
   }
   
   float getX(){
@@ -26,6 +30,8 @@ class Player{
   }
   
   void display(){
-    animation.display((int)location.x, (int)location.y, 100, 100);
+    animation.display((int)location.x, (int)location.y, 100, 50);
   }
 }
+
+

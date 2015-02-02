@@ -1,24 +1,34 @@
 class Status{
-  //0 = game over, 1 = game running, 2 = paused
-  int gameState = 2, iconWidth = 50, iconHeight = 50, notifyTime;
-  float shieldDuration = 300, start, score, last, bonus;
+  float shieldDuration = 300, notifyTime, iconWidth, iconHeight, gameState = 2, start, score, last, bonus;
   String notifyText;
-  
   boolean shieldStatus;
-  PImage shieldIcon = loadImage("shield (0).png");
+  //Minim minim;
+  AudioPlayer introSong;
+  AudioPlayer backgroundSong;
+  AudioPlayer gameOverSound;
+  //0 for game over, 1 for running, 2 for paused
   
-  Status(){
+  Status(float iconWidth, float iconHeight){
+    this.iconWidth = iconWidth;
+    this.iconHeight = iconHeight;
     
+    introSong = minim.loadFile("1. Intro Music.mp3");
+    backgroundSong = minim.loadFile("2. Background Music.mp3");
+    gameOverSound = minim.loadFile("9. Game Over.wav");
   }
   
-  int getGameState(){
+  void addBonus(){
+    bonus += 5;
+  }
+  
+  float getState(){
     return gameState;
   }
   
-  void setGameState(int i){
-    gameState = i;
+  void setState(float state){
+    gameState = state;
   }
-  //score suff
+  
   float getScore(){
     score = (millis()/1000 - start) + bonus;
     return score;
@@ -29,11 +39,13 @@ class Status{
     return last;
   }
   
-  void addBonus(float i){
-    bonus += i;
+  void reset(){
+    start = millis()/1000;
+    gameState = 1;
+    bonus = 0;
+    shieldDuration = 180;
   }
   
-  //shield stuff
   float getShieldDuration(){
     return shieldDuration;
   }
@@ -50,38 +62,36 @@ class Status{
     shieldStatus = shield;
   }
   
-  //reset
-  void reset(){
-    gameState = 1;
-    bonus = 0;
-    shieldDuration = 180;
-  }
-  
   void drawText(String s, float x, float y, int size) {
-    //Text output method, string, xy coords, size of text
+    //Text output method
     textAlign(CENTER);
     textSize(size);
     text(s, x, y); 
   }
-  
-  void setNotifyText(String s, int i){
+ 
+  void setNotifyText(String s, float i){
     notifyText = s;
     notifyTime = i;
   }
   
   void display(){
-    //display shield stuff in top right
-    image(shieldIcon, (width - 155), 30, iconWidth, iconHeight);
-    String sDuration = nfs(getShieldDuration()/60, 1, 1);
-    drawText(sDuration, (width - 157.5), 35, 12);
+    String shieldDuration = nfs(getShieldDuration()/60, 1, 1);
+    drawText("Shield: " + shieldDuration, width - 155, 35, 12);
     
-    switch(gameState){
+    switch((int)gameState){
       case 0:
+        backgroundSong.pause();
+        backgroundSong.rewind();
+        
         drawText("Score: " + (int)getLastScore(), width - 55, 35, 12);
         drawText("Game Over. Press 'r' to restart.", width/2, height/2, 20);
         break;
       case 1:
-        //score currently adding seconds from before gamestart. Works properly on reset
+        introSong.pause();
+        introSong.rewind();
+        gameOverSound.rewind();
+        backgroundSong.play();
+        
         drawText("Score: " + (int)getScore(), width - 55, 35, 12);
         
         if ((getShieldDuration() > 0) && (getShieldStatus() == true)){
@@ -95,15 +105,14 @@ class Status{
         
         break;
       case 2:
-        start = millis()/1000;
         drawText("Press SPACE to start", width/2, height/2, 20);
         drawText("Score: " + (int)getLastScore(), width - 55, 35, 12);
+        introSong.play();
         break;
     }
     
-    //displays notifications for a set amount of time to screen
     if (notifyTime > 0){
-      drawText(notifyText, width/2, (height/2) - (height/4), 16);
+      drawText(notifyText, width/2, (height/2) - 200, 16);
       notifyTime--;
     }
   }

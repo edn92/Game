@@ -1,105 +1,110 @@
-import java.util.*;
+import ddf.minim.*;
 
-Player player;
+Minim minim;
+AudioPlayer shieldActivated;
+
 Status status;
-LinkedList<PowerUp> powerUps = new LinkedList();
-LinkedList<Obstacle> walls = new LinkedList();
-LinkedList<Obstacle> obstacles = new LinkedList();
+Player player;
 
-float powerUpsStartSize = 2, wallsStartSize = 3, obstaclesStartSize = 1;
-float x, backgroundMoveSpeed = 2, playerMoveSpeed = 5, increaseSpeedCountdown = 600;
-/*
-  x = background image x coord
-  increaseSpeedCountdown = amount of time before speed increases. Currently starts increasing once a second after 10 seconds to give a smoother increase
-*/
-int keysSize = 5;
+Obstacle target;
 
+ArrayList<Wall> bookShelves = new ArrayList();
+ArrayList<Obstacle> obstacles = new ArrayList();
+ArrayList<PowerUp> powerUps = new ArrayList();
+
+float flyerWidth = 100, flyerHeight = 50, iconWidth = 70, iconHeight = 50; 
+float bookShelvesArray = 2, obstaclesArray = 5, powerUpsArray = 2, backgroundMoveSpeed = 2, playerMoveSpeed = 5;
+//countdown = framerate x 10
+int countdown = 600, x = 0;
 boolean [] keys;
-boolean shieldToggle;
-//allows shield to be toggled correctly on one hotkey
+
 PImage background;
 
 void setup(){
-  size(800, 400);
-  background = loadImage("background.jpg");
-  keys = new boolean[keysSize];
+  size (1000, 600);
+  background = loadImage("background.png");
   
-  player = new Player(new PVector(50, height/2));
-  status = new Status();
+  minim = new Minim(this);
+  shieldActivated = minim.loadFile("8. Shield Activated.wav");
   
-  for (int i = 0; i < powerUpsStartSize; i++){
-    powerUps.add(new Shield(new PVector(random(100, width), random(75, height - 75)))); 
+  keys = new boolean[4];
+  
+  player = new Player(new PVector(50, height/2), flyerWidth, flyerHeight);
+  status = new Status(iconWidth, iconHeight);
+  
+  addObstacle();  
+  for (int i = 0; i < bookShelvesArray; i++){ 
+    bookShelves.add(new Shelf(new PVector(width/2 + (i*(width/2)), random((height/2) + 100, height + 200)))); 
   }
   
-  for (int i = 0; i < wallsStartSize; i++){
-    walls.add(new Wall(new PVector(width/2 + (i * width/3), random(75, height - 75))));
+  for (int i = 0; i < powerUpsArray; i++){
+    powerUps.add(new Shield(new PVector(random(width - 100, width + 300), random(75, height - 75)))); 
   }
-  
-  for (int i = 0; i < obstaclesStartSize; i++){
-    obstacles.add(new Tracker(new PVector(300, height/2)));
-  }
-} 
+}
 
-void draw(){ 
-  //display things
+void addObstacle(){
+  obstacles.add(new Tracker(new PVector(random(width, width + 200), random(50, height - 50))));
+  obstacles.add(new Stapler(new PVector(random(width, width + 200), random(50, height - 50))));
+  obstacles.add(new Book(new PVector(random(width + 200, width + 300), random(0, height))));
+  obstacles.add(new Book(new PVector(random(width + 200, width + 300), random(0, height))));
+  obstacles.add(new Book(new PVector(random(width + 200, width + 300), random(0, height))));
+}
+
+void draw(){
   background(0);
   imageMode(CORNER);
   image(background, x, 0, width, height);
   image(background, x + width, 0, width, height);
   
-  for (int i = 0; i < walls.size(); i++){
-    walls.get(i).display();
+  imageMode(CENTER);
+  
+  input();
+  //display
+  for (int i = 0; i < bookShelves.size(); i++) { 
+    bookShelves.get(i).display(); 
   }
   
-  for (int i = 0; i < powerUps.size(); i++){
-    powerUps.get(i).display();
+  player.display();  
+  
+  for (int i = 0; i < obstacles.size(); i++) { 
+    obstacles.get(i).display(); 
   }
   
-  for (int i = 0; i < obstacles.size(); i++){
-    obstacles.get(i).display();
+  for (int i = 0; i < powerUps.size(); i++) {
+    powerUps.get(i).display(); 
   }
   
-  player.display();
   status.display();
   
-  //run things if game is still going
-  if (status.getGameState() == 1){
-    //moves and resets background continuously
-    x -= backgroundMoveSpeed;
-    if (x <= - width){
-      x += width;
-    }
+  //if game is running do all of this stuff
+  if (status.getState() == 1){
+    x-= backgroundMoveSpeed;
+    if (x <= -width) x += width;
     
-    if (increaseSpeedCountdown == 00 && backgroundMoveSpeed < 100){
+    if (countdown == 0 && backgroundMoveSpeed < 10){
       backgroundMoveSpeed += 0.1;
-      increaseSpeedCountdown = 60;
-    } else {
-      increaseSpeedCountdown--;
+      countdown = 60;
+    } else { 
+      countdown--; 
     }
     
-    //check collision with stuff
-    for (int i = 0; i < powerUps.size(); i++){
+    for (int i = 0; i < bookShelves.size(); i++) {
+      bookShelves.get(i).collision(player.getX(), player.getY(), status);
+      bookShelves.get(i).setX(bookShelves.get(i).getX() - backgroundMoveSpeed);
+    }
+    for (int i = 0; i < obstacles.size(); i++) {
+      obstacles.get(i).collision(player.getX(), player.getY(), status, backgroundMoveSpeed);
+    }
+    for (int i = 0; i < powerUps.size(); i++) { 
       powerUps.get(i).collision(player.getX(), player.getY(), status);
       powerUps.get(i).setX(powerUps.get(i).getX() - backgroundMoveSpeed);
-    }
-    
-    for (int i = 0; i < walls.size(); i++){
-      //if walls are too close to each other respawn
-      walls.get(i).collision(player.getX(), player.getY(), status);
-      walls.get(i).setX(walls.get(i).getX() - backgroundMoveSpeed);
-    }
-    
-    for (int i = 0; i < obstacles.size(); i++){
-      obstacles.get(i).collision(player.getX(), player.getY(), status);
-    }
+    }  
   }
-  
-  keyboardInput();
 }
 
-void keyboardInput(){
-  //if state = 1 allow player to move
-  if (status.getGameState() == 1){
+void input(){
+  if (status.getState() == 1){
+    //In order WASD
     if (keys[0]){ 
       if (player.getY() > 25){
         player.move(0, -playerMoveSpeed);
@@ -123,38 +128,70 @@ void keyboardInput(){
         player.move(playerMoveSpeed, 0);
       }
     }
-    
-    if (keys[4]){
-      if (shieldToggle == false){
-        shieldToggle = true;
-        if (status.getShieldStatus() == true){
-          status.setShieldStatus(false);
-          status.setNotifyText("Deactivating shield!", 120);
-        } else if (status.getShieldDuration() > 0){
+  }
+  
+  switch(key){
+    case '1':
+      if (status.getState() == 1){
+        if (status.getShieldDuration() > 0){
           status.setShieldStatus(true);
           status.setNotifyText("Shielded!", 120);
-        } else {
-          status.setNotifyText("Shield depleted.", 120);
+          shieldActivated.play();
+          shieldActivated.rewind();
+        } else { 
+          status.setNotifyText("Shield depleted.", 120); 
         }
       }
-    }    
-  }  
-  switch(key){
-    case 'r':
-      if (status.getGameState() == 0){
-        status.reset();
-        player.startPosition();
-        backgroundMoveSpeed = 2;
-        
-        //reset obstacles and walls
-      }
-    case ' ':
-      if (status.getGameState() == 2){ 
-        status.setGameState(1); 
+      break; 
+      
+    case '2':
+      if (status.getState() == 1){
+        status.setShieldStatus(false);
+        status.setNotifyText("Deactivating shield!", 120);
       }
       break;
+      
+    case 'r':
+      if (status.getState() == 0){
+        player.startPosition();
+        status.reset();
+        backgroundMoveSpeed = 2;
+       
+        //rearrange starting positions
+        for (int i = 0; i < bookShelves.size(); i++){ 
+          bookShelves.get(i).reset(width/2 + i*(width/2), (height/2) + 100, height + 200); 
+        }
+        //staple and tracker
+        for (int i = 0; i < 2; i++){  
+          obstacles.get(i).reset(random(width - 100, width + 300), random(75, height - 75)); 
+        }
+        //book
+        for (int i = 2; i < obstacles.size(); i++){ 
+          obstacles.get(i).reset(random(width + 100, width + 200), random (0, height)); 
+        }
+      }
+      break;
+      
+    case ' ':
+      if (status.getState() == 2){ 
+        status.setState(1); 
+      }
+      break;
+    }
+}
+
+void mousePressed(){
+  if (status.getState() == 1){
+    for (int i = 0; i < obstacles.size(); i++){
+      if (obstacles.get(i).clicked()){
+        obstacles.get(i).setDestroyed(true);
+        obstacles.get(i).setRespawn();
+        status.addBonus();
+      }
+    }
   }
 }
+
 
 void keyPressed(){
   switch (key){
@@ -170,9 +207,6 @@ void keyPressed(){
     case 'd':
       keys[3] = true;
       break;
-    case '1':
-      keys[4] = true;
-      break;  
   }
 }
 
@@ -190,19 +224,5 @@ void keyReleased(){
     case 'd':
       keys[3] = false;
       break;
-    case '1':
-      keys[4] = false;
-      shieldToggle = false;
-      break;  
   }
 }
-
-/*void mousePressed(){
-  if (status.getGameState() == 1){
-    for (int i = 0; i < obstacles.size(); i++){
-      if (obstacles.get(i).clicked()){
-        println("clicked on: " + i);
-      }
-    }
-  }
-}*/
